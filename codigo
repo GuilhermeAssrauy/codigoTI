@@ -1,0 +1,141 @@
+/*PROJETO TI-GUILHERME HENRIQUE ASSRAUY RIBEIRO
+			      -JOÃO VITOR RODRIGUES GONÇALVES
+            -PAULO ROBERTO DOS SANTOS JUNIOR*/
+
+
+//Usando sensor HC-05
+
+
+//OS COMANDOS DO BLIETTOTH ESTÃO EM COMENTÁRIO POIS O TINKERCAD
+//NÃO POSSUI O MÓDULO BLUETOOTH
+
+
+//Carrega a biblioteca SoftwareSerial
+//(Tirar o // para funcionar)
+//#include <SoftwareSerial.h>
+
+const int pinoRX = 13; //PINO DIGITAL 2 (RX)
+const int pinoTX = 12; //PINO DIGITAL 3 (TX)
+
+byte dadoBluetooth = 0; //VARIÁVEL QUE ARMAZENA O VALOR ENVIADO PELO BLUETOOTH
+
+
+//SoftwareSerial bluetooth(pinoRX, pinoTX); //PINOS QUE EMULAM A SERIAL, ONDE
+//O PINO 2 É O RX E O PINO 3 É O TX
+
+const int pingPin8 = 8;
+const int pingPin9 = 9;
+const int pingPin10 = 10;
+byte envia1=0;
+
+
+void setup() {
+  //bluetooth.begin(9600); //Inicializa a serial Bluetooth
+  pinMode(7, OUTPUT);//define as entradas
+  pinMode(6, OUTPUT);
+  pinMode(5, OUTPUT);
+  pinMode(4, OUTPUT);
+  pinMode(3, OUTPUT);
+  pinMode(2, OUTPUT);
+  Serial.begin(9600); // inicia comunicação serial
+  
+}
+
+
+void loop() {
+ 
+  byte byteRecebido=4;
+  byte byteEnviar1,byteEnviar2,byteEnviar3;
+  //if(bluetooth.available()){ //SE O BLUETOOTH ESTIVER HABILITADO, FAZ
+  //byteRecebido = bluetooth.read(); //VARIÁVEL RECEBE O VALOR ENVIADO PELO BLUETOOTH
+
+  long duracao, cm, aux1, aux2, aux3;
+
+	
+	
+//---------------------------//pulso "trigger" no sensor pino 8
+   
+  aux1=funcao(duracao,cm,pingPin8);		//chama função de medir a distância
+  if(aux1<=315){						//Se a distância for menor que 315cm, identifica como garagem ocupada
+  	digitalWrite(4,LOW);				//led apaga se estiver ocupada(ilustração)
+    byteEnviar1= bitSet(byteEnviar1,1);
+    Serial.print("\n VAGA OCUPADA ");
+  }else{								//Se não, identifica como garagem vazia(ilustração)
+    digitalWrite(4,HIGH);				//led acende se estiver vazia
+    byteEnviar1= bitSet(byteEnviar1,2);
+    Serial.print("\n VAGA VAZIA ");
+  }
+
+//---------------------------//pulso "trigger" no sensor pino 9
+  
+  aux2=funcao(duracao,cm,pingPin9);		//chama função de medir a distância
+  if(aux2<=4){							//Se a distância for menor que 4cm, identifica como porta fechada
+  	digitalWrite(3,LOW);				//led apaga se tiver fechada(ilustração)
+    byteEnviar2= bitSet(byteEnviar2,3);
+    Serial.print("\n PORTA FECHADA: ");
+
+  }else{								//Se não, identifica como porta aberta
+    digitalWrite(3,HIGH);				//led acende se tiver aberta(ilustração)
+    byteEnviar2= bitSet(byteEnviar2,4);
+    Serial.print("\n PORTA ABERTA ");
+  }
+  
+//---------------------------//pulso "trigger" no sensor pino 8
+  
+  aux3=funcao(duracao,cm,pingPin10);	//chama função de medir a distância
+  if(aux3<=4){							//Se a distância for menor que 4cm, identifica como janela fechada
+    digitalWrite(2,LOW);				//led apaga se tiver fechada
+    byteEnviar3= bitSet(byteEnviar3,5);
+    Serial.print("\n JANELA FECHADA: ");
+  }else{								//Se não, identifica como janela aberta
+	digitalWrite(2,HIGH);				//led acende se tiver aberta(ilustração)
+    byteEnviar3= bitSet(byteEnviar3,6);
+    Serial.print("\n JANELA ABERTA ");
+  }
+  
+if(byteRecebido==1){	 //Se o byte recebido for 1, acende a luz 1
+  digitalWrite(7,HIGH);}
+
+else if(byteRecebido==2){//Se o byte recebido for 2, apaga luz 1
+  digitalWrite(7,LOW);}
+
+else if(byteRecebido==3){//Se o byte recebido for 3, acende a luz 2
+  digitalWrite(6,HIGH);}
+
+else if(byteRecebido==4){//Se o byte recebido for 4, apaga luz 2
+  digitalWrite(6,LOW);}
+
+else if(byteRecebido==5){//Se o byte recebido for 5, acende a luz 3
+  digitalWrite(5,HIGH);}
+
+else if(byteRecebido==6){//Se o byte recebido for 6, apaga luz 3
+  digitalWrite(5,LOW);}
+
+  delay(100);
+}
+
+
+int funcao(long duracao,long cm, int pingPin){
+  // função que retorna distancia de cada sensor em cm
+  pinMode(pingPin, OUTPUT);
+  digitalWrite(pingPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(pingPin, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(pingPin, LOW); 
+  
+  
+  pinMode(pingPin, INPUT);
+  duracao = pulseIn(pingPin, HIGH);
+  cm = microsegundosParaCM(duracao);
+
+  return cm;
+
+
+}
+
+
+
+long microsegundosParaCM(long microsegundos) {
+  return microsegundos / 29 / 2;
+}
