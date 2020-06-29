@@ -111,7 +111,7 @@ else if(byteRecebido==5){//Se o byte recebido for 5, acende a luz 3
 else if(byteRecebido==6){//Se o byte recebido for 6, apaga luz 3
   digitalWrite(5,LOW);}
 
-  delay(100);
+  delay(1000);
 }
 
 
